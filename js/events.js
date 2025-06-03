@@ -190,6 +190,8 @@ const EventManager = (() => {
                     cell.removeChild(child);
                 }
             });
+            // Set position relative for proper absolute positioning of events
+            cell.style.position = 'relative';
         });
         
         // Create a normalized date for comparison (with time set to midnight)
@@ -218,7 +220,7 @@ const EventManager = (() => {
         timedEvents.forEach(event => {
             const startHour = event.start.getHours();
             
-            // Find the correct hour content element
+            // Find the correct hour content element for the start time
             let hourContent;
             
             if (startHour >= 6) {
@@ -426,6 +428,32 @@ const EventManager = (() => {
             // Default color for events without a role
             eventElement.style.backgroundColor = '#4285f4';
             eventElement.style.color = '#ffffff';
+        }
+        
+        // Calculate position and height for day view
+        if (viewType === 'day' && !isAllDay) {
+            const startHour = event.start.getHours();
+            const startMinutes = event.start.getMinutes();
+            const endHour = event.end.getHours();
+            const endMinutes = event.end.getMinutes();
+            
+            // Calculate duration in minutes
+            const durationMinutes = (event.end - event.start) / (1000 * 60);
+            
+            // Calculate top position (offset from the start of the hour)
+            const topOffset = (startMinutes / 60) * 60; // 60px per hour
+            
+            // Calculate height based on duration
+            const height = (durationMinutes / 60) * 60; // 60px per hour
+            
+            // Apply positioning
+            eventElement.style.position = 'absolute';
+            eventElement.style.top = `${topOffset}px`;
+            eventElement.style.height = `${Math.max(height, 20)}px`; // Minimum height of 20px
+            eventElement.style.left = '0';
+            eventElement.style.right = '0';
+            eventElement.style.margin = '0 4px';
+            eventElement.style.zIndex = '1';
         }
         
         // Add click event to open edit modal
