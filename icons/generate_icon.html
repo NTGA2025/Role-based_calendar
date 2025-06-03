@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendar Icon Generator</title>
+    <style>
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        canvas {
+            border: 1px solid #ccc;
+            margin: 20px 0;
+        }
+        .buttons {
+            display: flex;
+            gap: 10px;
+        }
+        button {
+            padding: 10px 15px;
+            background: #007aff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        p {
+            max-width: 600px;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <h1>日历应用图标生成器</h1>
+    <p>此页面生成PWA所需的两种尺寸的图标。生成后，右键点击图标并保存为"icon-192x192.png"和"icon-512x512.png"。</p>
+    
+    <h2>192x192 图标</h2>
+    <canvas id="smallIcon" width="192" height="192"></canvas>
+    
+    <h2>512x512 图标</h2>
+    <canvas id="largeIcon" width="512" height="512"></canvas>
+    
+    <div class="buttons">
+        <button id="generateBtn">生成图标</button>
+        <button id="downloadSmallBtn">下载小图标</button>
+        <button id="downloadLargeBtn">下载大图标</button>
+    </div>
+
+    <script>
+        // 绘制日历图标
+        function drawCalendarIcon(canvas, size) {
+            const ctx = canvas.getContext('2d');
+            const padding = size * 0.1;
+            const radius = size * 0.1;
+            
+            // 背景
+            ctx.fillStyle = '#007aff';
+            ctx.fillRect(0, 0, size, size);
+            
+            // 日历纸张
+            ctx.fillStyle = '#ffffff';
+            roundRect(ctx, padding, padding * 2, size - padding * 2, size - padding * 3, radius);
+            ctx.fill();
+            
+            // 日历顶部
+            ctx.fillStyle = '#ff3b30';
+            roundRect(ctx, padding, padding, size - padding * 2, padding * 1.5, {tl: radius, tr: radius, bl: 0, br: 0});
+            ctx.fill();
+            
+            // 日期文本
+            const dateSize = size * 0.4;
+            ctx.font = `bold ${dateSize}px -apple-system, BlinkMacSystemFont, sans-serif`;
+            ctx.fillStyle = '#333333';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(new Date().getDate().toString(), size/2, size/2 + size * 0.1);
+            
+            // 画出两个"绑定"的小圆
+            const bindingRadius = size * 0.04;
+            const bindingYPos = padding * 1.5;
+            const bindingXOffset = size * 0.25;
+            
+            ctx.fillStyle = '#555555';
+            ctx.beginPath();
+            ctx.arc(size/2 - bindingXOffset, bindingYPos, bindingRadius, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.beginPath();
+            ctx.arc(size/2 + bindingXOffset, bindingYPos, bindingRadius, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        
+        // 辅助函数：绘制圆角矩形
+        function roundRect(ctx, x, y, width, height, radius) {
+            if (typeof radius === 'number') {
+                radius = {tl: radius, tr: radius, br: radius, bl: radius};
+            }
+            
+            ctx.beginPath();
+            ctx.moveTo(x + radius.tl, y);
+            ctx.lineTo(x + width - radius.tr, y);
+            ctx.quadraticCurveTo(x + width, y, x + width, y + radius.tr);
+            ctx.lineTo(x + width, y + height - radius.br);
+            ctx.quadraticCurveTo(x + width, y + height, x + width - radius.br, y + height);
+            ctx.lineTo(x + radius.bl, y + height);
+            ctx.quadraticCurveTo(x, y + height, x, y + height - radius.bl);
+            ctx.lineTo(x, y + radius.tl);
+            ctx.quadraticCurveTo(x, y, x + radius.tl, y);
+            ctx.closePath();
+        }
+        
+        // 生成图标
+        document.getElementById('generateBtn').addEventListener('click', () => {
+            const smallCanvas = document.getElementById('smallIcon');
+            const largeCanvas = document.getElementById('largeIcon');
+            
+            drawCalendarIcon(smallCanvas, 192);
+            drawCalendarIcon(largeCanvas, 512);
+        });
+        
+        // 下载图标
+        document.getElementById('downloadSmallBtn').addEventListener('click', () => {
+            downloadCanvas('smallIcon', 'icon-192x192.png');
+        });
+        
+        document.getElementById('downloadLargeBtn').addEventListener('click', () => {
+            downloadCanvas('largeIcon', 'icon-512x512.png');
+        });
+        
+        function downloadCanvas(canvasId, filename) {
+            const canvas = document.getElementById(canvasId);
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+        
+        // 页面加载时自动生成图标
+        window.onload = () => {
+            document.getElementById('generateBtn').click();
+        };
+    </script>
+</body>
+</html> 
